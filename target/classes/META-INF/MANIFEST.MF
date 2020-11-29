@@ -1,0 +1,10 @@
+Manifest-Version: 1.0
+Built-By: User
+Build-Jdk: 15
+Implementation-Title: reto5
+Implementation-Version: 0.0.1-SNAPSHOT
+Implementation-Vendor-Id: com.example
+Implementation-URL: https://projects.spring.io/spring-boot/#/spring-boot
+ -starter-parent/basic
+Created-By: Maven Integration for Eclipse
+
