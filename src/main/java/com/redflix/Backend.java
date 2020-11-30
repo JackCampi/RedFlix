@@ -5,6 +5,7 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -22,7 +23,7 @@ class Backend {
 	@Autowired
     private static UsuarioRepositorio usRepos;
 	@Autowired
-	private static DirectorRepositorio diRrepos;
+	private static DirectorRepositorio dirRepos;
 	@Autowired
 	private static PeliculaRepositorio peliRepos;
 	@Autowired
@@ -45,7 +46,7 @@ class Backend {
 		    	
 		    	
 			    Director usuario = getDirector(map);
-			    diRrepos.save(usuario);  
+			    dirRepos.save(usuario);  
 			    
 		    }else if(tabla.equals(Constants.pelicula)){
 		    	
@@ -86,15 +87,76 @@ class Backend {
 	
 	public static HashMap<String,String> buscar(String tabla, String busqueda){
 		
-		//empty keys
-		return null;
+		HashMap<String,String> map;
+		if(tabla.equals(Constants.usuario)){
+			
+			Optional<Usuario> optional = usRepos.findById(busqueda);
+			if(optional.isPresent()) return getUsuarioDic(optional.get());
+			else return getEmptyUsuarioDic();
+
+		    
+	    }else if(tabla.equals(Constants.director)){
+	    	
+	    	Optional<Director> optional = dirRepos.findByName(busqueda);
+			if(optional.isPresent()) return getDirectorDic(optional.get());
+			else return getEmptyDirectorDic();
+		    
+	    }else if(tabla.equals(Constants.pelicula)){
+	    	
+	    	Optional<Pelicula> optional = peliRepos.findById(busqueda);
+			if(optional.isPresent()) return getPeliculaDic(optional.get());
+			else return getEmptyPeliculaDic(); 
+		    
+	    }else if(tabla.equals(Constants.serie)){
+	    	
+	    	Optional<Serie> optional = serieRepos.findById(busqueda);
+			if(optional.isPresent()) return getSerieDic(optional.get());
+			else return getEmptySerieDic();
+		    
+	    }else {
+	    	return null;
+	    }
 	
 	}
 
 
 	public static boolean eliminar(String tabla, String llave_primaria){
 	
-		return true;
+		try {
+			
+			if(tabla.equals(Constants.usuario)){
+
+			    usRepos.deleteById(llave_primaria); 
+			    
+		    }else if(tabla.equals(Constants.director)){
+		    	
+		    	dirRepos.deleteById(llave_primaria);  
+			    
+		    }else if(tabla.equals(Constants.pelicula)){
+		    	
+			    peliRepos.deleteById(llave_primaria); 
+			    
+		    }else if(tabla.equals(Constants.serie)){
+		    	
+			    serieRepos.deleteById(llave_primaria); 
+			    
+		    }else if(tabla.equals(Constants.contenido)){
+		    	
+			    contRepos.deleteById(llave_primaria); 		
+			    
+		    }else if(tabla.equals(Constants.transmision)){
+		    	
+			    trRepos.deleteById(llave_primaria); 
+			    
+		    }
+			
+			return true;
+			
+		}catch(Exception e) {
+			
+			return false;
+			
+		}
 	
 	}
 	
@@ -158,6 +220,83 @@ class Backend {
 		usuario.setUsrFechana(localDate);
 
 		return usuario;
+	}
+	
+	public static HashMap<String,String> getSerieDic(Serie serie){
+		HashMap<String,String> serieDic = new HashMap<String,String>();
+		serieDic.put(Constants.serie_titulo, serie.getSrTitulo());
+		serieDic.put(Constants.serie_episodios, serie.getSrEpisodios().toString());
+		serieDic.put(Constants.serie_episodios, serie.getSrTemp().toString());
+		return serieDic;
+	}
+	
+	public static HashMap<String,String> getPeliculaDic(Pelicula pelicula){
+		HashMap<String,String> peliDic = new HashMap<String,String>();
+		peliDic.put(Constants.pelicula_titulo, pelicula.getPeliTitulo());
+		peliDic.put(Constants.pelicula_resumen, pelicula.getPeliResumen());
+		peliDic.put(Constants.pelicula_director, pelicula.getDirector().toString());
+		peliDic.put(Constants.pelicula_agno, pelicula.getPeliAnno().toString());
+		return peliDic;
+	}
+	
+	public static HashMap<String,String> getDirectorDic(Director director){
+		HashMap<String,String> directorDic = new HashMap<String,String>();
+		directorDic.put(Constants.director_id, director.getDirId().toString());
+		directorDic.put(Constants.director_nombre,director.getDirNombre());
+		directorDic.put(Constants.director_apellido, director.getDirApellido());
+		directorDic.put(Constants.director_nacionalidad, director.getDirNacionalidad());
+		return directorDic;
+	}
+	
+	public static HashMap<String,String> getUsuarioDic(Usuario usuario){
+		HashMap<String,String> usuarioDic = new HashMap<String,String>();
+		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+		usuarioDic.put(Constants.usuario_alias, usuario.getUsrAlias());
+		usuarioDic.put(Constants.usuario_nombre, usuario.getUsrNombre());
+		usuarioDic.put(Constants.usuario_apellido, usuario.getUsrApellido());
+		usuarioDic.put(Constants.usuario_celular, usuario.getUsrCelular());
+		usuarioDic.put(Constants.usuario_contrasegna, usuario.getUsrContrasenna());
+		usuarioDic.put(Constants.usuario_email, usuario.getUsrEmail());
+		usuarioDic.put(Constants.usuario_fecha_nacimiento, usuario.getUsrFechana().format(formatter));
+		return usuarioDic;
+	}
+	
+	public static HashMap<String,String> getEmptySerieDic(){
+		HashMap<String,String> serieDic = new HashMap<String,String>();
+		serieDic.put(Constants.serie_titulo, "No encontrado");
+		serieDic.put(Constants.serie_episodios, "No encontrado");
+		serieDic.put(Constants.serie_episodios, "No encontrado");
+		return serieDic;
+	}
+	
+	public static HashMap<String,String> getEmptyPeliculaDic(){
+		HashMap<String,String> peliDic = new HashMap<String,String>();
+		peliDic.put(Constants.pelicula_titulo, "No encontrado");
+		peliDic.put(Constants.pelicula_resumen, "No encontrado");
+		peliDic.put(Constants.pelicula_director, "No encontrado");
+		peliDic.put(Constants.pelicula_agno, "No encontrado");
+		return peliDic;
+	}
+	
+	public static HashMap<String,String> getEmptyDirectorDic(){
+		HashMap<String,String> directorDic = new HashMap<String,String>();
+		directorDic.put(Constants.director_id, "No encontrado");
+		directorDic.put(Constants.director_nombre,"No encontrado");
+		directorDic.put(Constants.director_apellido, "No encontrado");
+		directorDic.put(Constants.director_nacionalidad, "No encontrado");
+		return directorDic;
+	}
+	
+	public static HashMap<String,String> getEmptyUsuarioDic(){
+		HashMap<String,String> usuarioDic = new HashMap<String,String>();
+		usuarioDic.put(Constants.usuario_alias, "No encontrado");
+		usuarioDic.put(Constants.usuario_nombre, "No encontrado");
+		usuarioDic.put(Constants.usuario_apellido, "No encontrado");
+		usuarioDic.put(Constants.usuario_celular, "No encontrado");
+		usuarioDic.put(Constants.usuario_contrasegna, "No encontrado");
+		usuarioDic.put(Constants.usuario_email, "No encontrado");
+		usuarioDic.put(Constants.usuario_fecha_nacimiento, "No encontrado");
+		return usuarioDic;
 	}
 
 }
