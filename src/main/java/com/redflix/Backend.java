@@ -5,10 +5,15 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Optional;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.CommandLineRunner;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Component;
 
 import com.repos.*;
 import com.tablas.Contenido;
@@ -18,7 +23,22 @@ import com.tablas.Serie;
 import com.tablas.Transmision;
 import com.tablas.Usuario;
 
-class Backend {
+@Component
+class Backend{
+	
+	@Autowired
+	public Backend(UsuarioRepositorio usRepos,DirectorRepositorio dirRepos,PeliculaRepositorio peliRepos
+			,SerieRepositorio serieRepos,ContenidoRepositorio contRepos,TransmisionRepositorio trRepos) {
+		this.usRepos = usRepos;
+		this.dirRepos = dirRepos;
+		this.peliRepos = peliRepos;
+		this.serieRepos = serieRepos;
+		this.contRepos = contRepos;
+		this.trRepos = trRepos;
+	}
+	
+	
+	
 	
 	@Autowired
     private static UsuarioRepositorio usRepos;
@@ -77,7 +97,7 @@ class Backend {
 			return true;
 			
 		}catch(Exception e) {
-			
+			e.printStackTrace();
 			return false;
 			
 		}
@@ -117,6 +137,21 @@ class Backend {
 	    	return null;
 	    }
 	
+	}
+	
+	public static HashMap<String, Integer> buscarDirectores() {
+		
+		List<Director> directores = dirRepos.findAll();
+		
+		HashMap<String, Integer> map = new HashMap<String, Integer>();
+		
+		for(Director dir : directores) {
+			map.put(dir.getDirNombre(), dir.getDirId());
+		}
+		
+		return map;
+		
+		
 	}
 
 
@@ -161,12 +196,22 @@ class Backend {
 	}
 	
 	private static Director getDirector(HashMap<String, String> dirInfo){
-		Director director = new Director();
-		director.setDirId(Integer.parseInt(dirInfo.get(Constants.director_id)));
-		director.setDirNombre(dirInfo.get(Constants.director_nombre));
-		director.setDirApellido(dirInfo.get(Constants.director_apellido));
-		director.setDirNacionalidad(dirInfo.get(Constants.director_nacionalidad));
-		return director;
+		Optional<Director> directorOp = dirRepos.findByName(dirInfo.get(Constants.director_nombre));
+		//director.setDirId(Integer.parseInt(dirInfo.get(Constants.director_id)));
+		if(directorOp.isPresent()) {
+			Director director = directorOp.get();
+			director.setDirNombre(dirInfo.get(Constants.director_nombre));
+			director.setDirApellido(dirInfo.get(Constants.director_apellido));
+			director.setDirNacionalidad(dirInfo.get(Constants.director_nacionalidad));
+			return director;
+		}
+		else {
+			Director director = new Director();
+			director.setDirNombre(dirInfo.get(Constants.director_nombre));
+			director.setDirApellido(dirInfo.get(Constants.director_apellido));
+			director.setDirNacionalidad(dirInfo.get(Constants.director_nacionalidad));
+			return director;
+		}
 	}
 
 	private static Contenido getContenido(HashMap<String, String> contInfo){
@@ -182,7 +227,11 @@ class Backend {
 		pelicula.setPeliTitulo(pelInfo.get(Constants.pelicula_titulo));
 		pelicula.setPeliResumen(pelInfo.get(Constants.pelicula_resumen));
 		pelicula.setPeliAnno(Integer.parseInt(pelInfo.get(Constants.pelicula_agno)));
-		pelicula.setDirector(Integer.parseInt(pelInfo.get(Constants.pelicula_director)));
+		
+		Optional<Director> dir = dirRepos.findByName(pelInfo.get(Constants.pelicula_director));
+		
+		if(dir.isPresent()) pelicula.setDirector(dir.get());
+		else return null;
 		return pelicula;
 	}
 
@@ -226,7 +275,7 @@ class Backend {
 		HashMap<String,String> serieDic = new HashMap<String,String>();
 		serieDic.put(Constants.serie_titulo, serie.getSrTitulo());
 		serieDic.put(Constants.serie_episodios, serie.getSrEpisodios().toString());
-		serieDic.put(Constants.serie_episodios, serie.getSrTemp().toString());
+		serieDic.put(Constants.serie_temporadas, serie.getSrTemp().toString());
 		return serieDic;
 	}
 	
@@ -234,7 +283,7 @@ class Backend {
 		HashMap<String,String> peliDic = new HashMap<String,String>();
 		peliDic.put(Constants.pelicula_titulo, pelicula.getPeliTitulo());
 		peliDic.put(Constants.pelicula_resumen, pelicula.getPeliResumen());
-		peliDic.put(Constants.pelicula_director, pelicula.getDirector().toString());
+		peliDic.put(Constants.pelicula_director, pelicula.getDirector().getDirNombre());
 		peliDic.put(Constants.pelicula_agno, pelicula.getPeliAnno().toString());
 		return peliDic;
 	}

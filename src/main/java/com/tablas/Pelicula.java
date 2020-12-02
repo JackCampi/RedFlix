@@ -7,6 +7,7 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
+import javax.persistence.OneToOne;
 import javax.persistence.Table;
 
 @Entity
@@ -21,9 +22,14 @@ public class Pelicula {
     @Column(name = "peli_anno")
     private Integer peliAnno;
 
-    //@ManyToOne()
-    @JoinColumn(name = "peli_director", insertable = false, updatable = false)
-    private Integer director;
+    /*//@ManyToOne()
+    //@JoinColumn(name = "peli_director", insertable = false, updatable = false)
+    @Column(name="peli_director")
+    private Integer director;*/
+    
+    @OneToOne()
+    @JoinColumn(name = "peli_director", referencedColumnName="dir_id")
+    private Director director;
 
     /*@OneToMany(mappedBy = "contenido")
     private List<Contenido> contenidos;*/
@@ -52,11 +58,11 @@ public class Pelicula {
         this.peliAnno = peliAnno;
     }
 
-    public Integer getDirector() {
+    public Director getDirector() {
         return director;
     }
 
-    public void setDirector(Integer director) {
+    public void setDirector(Director director) {
         this.director = director;
     }
 

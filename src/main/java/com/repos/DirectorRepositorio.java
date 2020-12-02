@@ -13,7 +13,7 @@ import com.tablas.Director;
 @Repository
 public interface DirectorRepositorio extends JpaRepository<Director,String> {
 	
-	@Query("SELECT d FROM director d WHERE d.dirNombre = :name")
+	@Query("SELECT d FROM Director d WHERE d.dirNombre = :name")
 	public Optional<Director> findByName(@Param("name") String name);
 
 }

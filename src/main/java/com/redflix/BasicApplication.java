@@ -17,7 +17,10 @@ public class BasicApplication {
 
 	public static void main(String[] args) {
 		
+		Prototipo frame = new Prototipo();
 		SpringApplication.run(BasicApplication.class, args);
+		
+		frame.setVisible(true);
 		
 	}
 }

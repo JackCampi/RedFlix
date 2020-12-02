@@ -20,7 +20,7 @@ import javax.persistence.Table;
 public class Director {
 
     @Id
-    //@GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "dir_id")
     private Integer dirId;
     @Column(name = "dir_nombre")
